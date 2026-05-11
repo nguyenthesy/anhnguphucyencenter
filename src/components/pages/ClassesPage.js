@@ -101,15 +101,15 @@ export default function ClassesPage({ globalSearch }) {
             <table>
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th className="hide-mobile">#</th>
                   <th>Tên lớp</th>
                   <th>Giáo viên</th>
-                  <th>Giờ học</th>
+                  <th className="hide-mobile">Giờ học</th>
                   <th>Lịch học</th>
-                  <th>Học phí/buổi</th>
-                  <th>Số buổi</th>
-                  <th>Tổng học phí</th>
-                  <th>Sĩ số</th>
+                  <th className="hide-mobile">Học phí/buổi</th>
+                  <th className="hide-mobile">Số buổi</th>
+                  <th className="hide-mobile">Tổng học phí</th>
+                  <th className="hide-mobile">Sĩ số</th>
                   <th>Trạng thái</th>
                   <th style={{ textAlign: "right" }}>Thao tác</th>
                 </tr>
@@ -122,15 +122,15 @@ export default function ClassesPage({ globalSearch }) {
                 ) : (
                   filtered.map((c, idx) => (
                     <tr key={c.id}>
-                      <td style={{ color: "var(--text-light)" }}>{idx + 1}</td>
+                      <td className="hide-mobile" style={{ color: "var(--text-light)" }}>{idx + 1}</td>
                       <td style={{ fontWeight: 600 }}>{c.name}</td>
                       <td>{c.teacher || "—"}</td>
-                      <td>{c.time || "—"}</td>
+                      <td className="hide-mobile">{c.time || "—"}</td>
                       <td>{formatDays(c.scheduleDays)}</td>
-                      <td style={{ color: "var(--primary)", fontWeight: 600 }}>{c.feePerSession ? formatCurrency(c.feePerSession) : "—"}</td>
-                      <td>{c.totalSessions || "—"}</td>
-                      <td style={{ fontWeight: 600 }}>{c.totalCourseFee ? formatCurrency(c.totalCourseFee) : "—"}</td>
-                      <td>{(c.studentIds?.length || 0)}/{c.maxStudents || 20}</td>
+                      <td className="hide-mobile" style={{ color: "var(--primary)", fontWeight: 600 }}>{c.feePerSession ? formatCurrency(c.feePerSession) : "—"}</td>
+                      <td className="hide-mobile">{c.totalSessions || "—"}</td>
+                      <td className="hide-mobile" style={{ fontWeight: 600 }}>{c.totalCourseFee ? formatCurrency(c.totalCourseFee) : "—"}</td>
+                      <td className="hide-mobile">{(c.studentIds?.length || 0)}/{c.maxStudents || 20}</td>
                       <td>
                         <span className={`badge ${c.status === "active" ? "badge-success" : "badge-neutral"}`}>
                           {c.status === "active" ? "Hoạt động" : "Đã đóng"}

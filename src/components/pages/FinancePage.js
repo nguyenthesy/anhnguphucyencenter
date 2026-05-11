@@ -88,24 +88,24 @@ export default function FinancePage({ globalSearch }) {
       </div>
 
       <div className="toolbar" style={{ marginTop: 24 }}>
-        <div className="btn-group" style={{ flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="btn-group" style={{ flexWrap: "wrap", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ fontSize: 13, fontWeight: 600 }}>Bộ lọc:</span>
-            <select className="form-select" style={{ width: 100 }} value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
+            <select className="form-select" style={{ width: "auto", minWidth: 0 }} value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
               <option value="all">Tất cả tháng</option>
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>Tháng {i + 1}</option>
               ))}
             </select>
-            <select className="form-select" style={{ width: 100 }} value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
+            <select className="form-select" style={{ width: "auto", minWidth: 0 }} value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
               {[2024, 2025, 2026].map(y => <option key={y} value={y}>Năm {y}</option>)}
             </select>
-            <select className="form-select" style={{ width: 150 }} value={filterClass} onChange={(e) => setFilterClass(e.target.value)}>
+            <select className="form-select" style={{ width: "auto", minWidth: 0 }} value={filterClass} onChange={(e) => setFilterClass(e.target.value)}>
               <option value="all">Tất cả lớp</option>
               {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
             </select>
           </div>
-          <div className="toolbar-search" style={{ minWidth: 200 }}>
+          <div className="toolbar-search" style={{ minWidth: 0, flex: 1 }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
             <input placeholder="Tìm học viên..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>

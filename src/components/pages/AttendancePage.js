@@ -175,12 +175,12 @@ export default function AttendancePage({ globalSearch }) {
     <div>
       {/* Date navigation */}
       <div className="toolbar">
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-sm btn-outline" onClick={() => goDay(-1)}>←</button>
-          <input type="date" className="form-input" style={{ width: "auto" }} value={filterDate} onChange={(e) => { setFilterDate(e.target.value); setSelectedSession(null); }} />
+          <input type="date" className="form-input" style={{ width: "auto", minWidth: 0 }} value={filterDate} onChange={(e) => { setFilterDate(e.target.value); setSelectedSession(null); }} />
           <button className="btn btn-sm btn-outline" onClick={() => goDay(1)}>→</button>
           <button className="btn btn-sm btn-ghost" onClick={() => { setFilterDate(getToday()); setSelectedSession(null); }}>Hôm nay</button>
-          <span style={{ fontSize: 13, color: "var(--text-secondary)", marginLeft: 8 }}>
+          <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             {getDayOfWeek(filterDate)}
           </span>
         </div>

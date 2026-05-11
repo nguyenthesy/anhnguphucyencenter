@@ -106,12 +106,12 @@ export default function SessionsPage({ globalSearch }) {
   return (
     <div>
       <div className="toolbar">
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-sm btn-outline" onClick={() => goDay(-1)}>←</button>
-          <input type="date" className="form-input" style={{ width: "auto" }} value={filterDate} onChange={(e) => setFilterDate(e.target.value)} />
+          <input type="date" className="form-input" style={{ width: "auto", minWidth: 0 }} value={filterDate} onChange={(e) => setFilterDate(e.target.value)} />
           <button className="btn btn-sm btn-outline" onClick={() => goDay(1)}>→</button>
           <button className="btn btn-sm btn-ghost" onClick={() => setFilterDate(getToday())}>Hôm nay</button>
-          <span style={{ fontSize: 13, color: "var(--text-secondary)", marginLeft: 8 }}>
+          <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             {getDayOfWeek(filterDate)} — {filtered.length} buổi
           </span>
         </div>
@@ -130,7 +130,7 @@ export default function SessionsPage({ globalSearch }) {
           <div className="table-wrapper">
             <table>
               <thead>
-                <tr><th>#</th><th>Giờ</th><th>Lớp</th><th>Giáo viên</th><th>Phòng</th><th>Trạng thái</th><th>Ghi chú</th><th style={{ textAlign: "right" }}>Thao tác</th></tr>
+                <tr><th className="hide-mobile">#</th><th>Giờ</th><th>Lớp</th><th>Giáo viên</th><th className="hide-mobile">Phòng</th><th>Trạng thái</th><th className="hide-mobile">Ghi chú</th><th style={{ textAlign: "right" }}>Thao tác</th></tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
@@ -138,17 +138,17 @@ export default function SessionsPage({ globalSearch }) {
                 ) : (
                   filtered.map((s, idx) => (
                     <tr key={s.id}>
-                      <td style={{ color: "var(--text-light)" }}>{idx + 1}</td>
+                      <td className="hide-mobile" style={{ color: "var(--text-light)" }}>{idx + 1}</td>
                       <td style={{ fontWeight: 600, color: "var(--primary)" }}>{s.time || "—"}</td>
                       <td style={{ fontWeight: 600 }}>{s.className || "—"}</td>
                       <td>{s.teacherName || "—"}</td>
-                      <td>{s.room || "—"}</td>
+                      <td className="hide-mobile">{s.room || "—"}</td>
                       <td>
                         <span className={`badge ${s.status === "completed" ? "badge-success" : "badge-info"}`}>
                           {s.status === "completed" ? "Đã dạy" : "Sắp tới"}
                         </span>
                       </td>
-                      <td style={{ color: "var(--text-secondary)", maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.notes || ""}</td>
+                      <td className="hide-mobile" style={{ color: "var(--text-secondary)", maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.notes || ""}</td>
                       <td style={{ textAlign: "right" }}>
                         <div className="btn-group" style={{ justifyContent: "flex-end" }}>
                           <button className="btn btn-sm btn-ghost" onClick={() => openEdit(s)}>✏️</button>

@@ -184,14 +184,14 @@ export default function StudentsPage({ globalSearch }) {
             <table>
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th className="hide-mobile">#</th>
                   <th>Họ và tên</th>
                   <th>SĐT</th>
                   <th>Lớp</th>
-                  <th>Học phí</th>
-                  <th>Đã đóng</th>
-                  <th>Còn nợ</th>
-                  <th>TT thanh toán</th>
+                  <th className="hide-mobile">Học phí</th>
+                  <th className="hide-mobile">Đã đóng</th>
+                  <th className="hide-mobile">Còn nợ</th>
+                  <th className="hide-mobile">TT thanh toán</th>
                   <th>Trạng thái</th>
                   <th style={{ textAlign: "right" }}>Thao tác</th>
                 </tr>
@@ -204,16 +204,16 @@ export default function StudentsPage({ globalSearch }) {
                 ) : (
                   filtered.map((s, idx) => (
                     <tr key={s.id}>
-                      <td style={{ color: "var(--text-light)" }}>{idx + 1}</td>
+                      <td className="hide-mobile" style={{ color: "var(--text-light)" }}>{idx + 1}</td>
                       <td style={{ fontWeight: 600 }}>{s.fullName}</td>
                       <td>{s.phone || "—"}</td>
                       <td>{s.className || "—"}</td>
-                      <td>{s.totalFee ? formatCurrency(s.totalFee) : "—"}</td>
-                      <td style={{ color: "var(--success)" }}>{s.paidAmount ? formatCurrency(s.paidAmount) : "—"}</td>
-                      <td style={{ color: (s.totalFee || 0) - (s.paidAmount || 0) > 0 ? "var(--danger)" : "var(--success)", fontWeight: 600 }}>
+                      <td className="hide-mobile">{s.totalFee ? formatCurrency(s.totalFee) : "—"}</td>
+                      <td className="hide-mobile" style={{ color: "var(--success)" }}>{s.paidAmount ? formatCurrency(s.paidAmount) : "—"}</td>
+                      <td className="hide-mobile" style={{ color: (s.totalFee || 0) - (s.paidAmount || 0) > 0 ? "var(--danger)" : "var(--success)", fontWeight: 600 }}>
                         {s.totalFee ? formatCurrency((s.totalFee || 0) - (s.paidAmount || 0)) : "—"}
                       </td>
-                      <td>
+                      <td className="hide-mobile">
                         {(() => {
                           const ps = s.paymentStatus || "unpaid";
                           const info = PAYMENT_STATUSES.find(p => p.value === ps) || PAYMENT_STATUSES[0];

@@ -67,9 +67,9 @@ export default function TeachersPage({ globalSearch }) {
   return (
     <div>
       <div className="tabs" style={{ marginBottom: 24, borderBottom: "1px solid var(--border)" }}>
-        <button className={`tab-item ${activeTab === "list" ? "active" : ""}`} onClick={() => setActiveTab("list")}>👨‍🏫 Danh sách giáo viên</button>
-        <button className={`tab-item ${activeTab === "schedule" ? "active" : ""}`} onClick={() => setActiveTab("schedule")}>📅 Lịch dạy tháng</button>
-        <button className={`tab-item ${activeTab === "stats" ? "active" : ""}`} onClick={() => setActiveTab("stats")}>📊 Thống kê buổi dạy</button>
+        <button className={`tab-item ${activeTab === "list" ? "active" : ""}`} onClick={() => setActiveTab("list")}>👨‍🏫 DS giáo viên</button>
+        <button className={`tab-item ${activeTab === "schedule" ? "active" : ""}`} onClick={() => setActiveTab("schedule")}>📅 Lịch dạy</button>
+        <button className={`tab-item ${activeTab === "stats" ? "active" : ""}`} onClick={() => setActiveTab("stats")}>📊 Thống kê</button>
       </div>
 
       {activeTab === "list" ? (
@@ -93,16 +93,16 @@ export default function TeachersPage({ globalSearch }) {
               <div className="table-wrapper">
                 <table>
                   <thead>
-                    <tr><th>#</th><th>Họ và tên</th><th>Số điện thoại</th><th>Email</th><th>Môn dạy</th><th>Trạng thái</th><th style={{ textAlign: "right" }}>Thao tác</th></tr>
+                    <tr><th className="hide-mobile">#</th><th>Họ và tên</th><th>Số điện thoại</th><th className="hide-mobile">Email</th><th className="hide-mobile">Môn dạy</th><th>Trạng thái</th><th style={{ textAlign: "right" }}>Thao tác</th></tr>
                   </thead>
                   <tbody>
                     {filteredTeachers.map((t, i) => (
                       <tr key={t.id}>
-                        <td>{i + 1}</td>
+                        <td className="hide-mobile">{i + 1}</td>
                         <td style={{ fontWeight: 600 }}>{t.fullName}</td>
                         <td>{t.phone || "—"}</td>
-                        <td>{t.email || "—"}</td>
-                        <td>{t.subjects || "—"}</td>
+                        <td className="hide-mobile">{t.email || "—"}</td>
+                        <td className="hide-mobile">{t.subjects || "—"}</td>
                         <td>
                           <span className={`badge ${t.status === "active" ? "badge-success" : "badge-neutral"}`}>
                             {t.status === "active" ? "Đang dạy" : "Nghỉ"}
@@ -125,16 +125,16 @@ export default function TeachersPage({ globalSearch }) {
       ) : activeTab === "schedule" ? (
         <>
           <div className="toolbar">
-            <div className="btn-group" style={{ flexWrap: "wrap" }}>
-              <select className="form-select" style={{ width: 180 }} value={selectedTeacherId} onChange={(e) => setSelectedTeacherId(e.target.value)}>
-                <option value="all">Tất cả giáo viên</option>
+            <div className="btn-group" style={{ flexWrap: "wrap", gap: 8 }}>
+              <select className="form-select" style={{ width: "auto", minWidth: 0 }} value={selectedTeacherId} onChange={(e) => setSelectedTeacherId(e.target.value)}>
+                <option value="all">Tất cả GV</option>
                 {teachers.map(t => <option key={t.id} value={t.id}>{t.fullName}</option>)}
               </select>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <select className="form-select" style={{ width: 120 }} value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
+                <select className="form-select" style={{ width: "auto", minWidth: 0 }} value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
                   {Array.from({ length: 12 }, (_, i) => <option key={i+1} value={i+1}>Tháng {i+1}</option>)}
                 </select>
-                <select className="form-select" style={{ width: 100 }} value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
+                <select className="form-select" style={{ width: "auto", minWidth: 0 }} value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
                   {[2024, 2025, 2026].map(y => <option key={y} value={y}>Năm {y}</option>)}
                 </select>
               </div>
@@ -180,12 +180,12 @@ export default function TeachersPage({ globalSearch }) {
       ) : (
         <>
           <div className="toolbar">
-            <div className="btn-group">
-              <select className="form-select" style={{ width: 120 }} value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
+            <div className="btn-group" style={{ flexWrap: "wrap", gap: 8 }}>
+              <select className="form-select" style={{ width: "auto", minWidth: 0 }} value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
                 <option value="all">Cả năm</option>
                 {Array.from({ length: 12 }, (_, i) => <option key={i+1} value={i+1}>Tháng {i+1}</option>)}
               </select>
-              <select className="form-select" style={{ width: 100 }} value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
+              <select className="form-select" style={{ width: "auto", minWidth: 0 }} value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
                 {[2024, 2025, 2026].map(y => <option key={y} value={y}>Năm {y}</option>)}
               </select>
             </div>
