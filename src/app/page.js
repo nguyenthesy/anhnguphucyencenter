@@ -1,66 +1,141 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { useState } from "react";
+import { login, register } from "@/lib/auth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import DashboardApp from "@/components/DashboardApp";
+
+function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
+  const [name, setName] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      if (isRegister) {
+        await register(email, password, name, "admin");
+      } else {
+        await login(email, password);
+      }
+    } catch (err) {
+      console.error("Auth error:", err.code, err.message);
+      const msg = err.code === "auth/invalid-credential"
+        ? "Email hoặc mật khẩu không đúng"
+        : err.code === "auth/email-already-in-use"
+        ? "Email đã được sử dụng"
+        : err.code === "auth/weak-password"
+        ? "Mật khẩu phải có ít nhất 6 ký tự"
+        : err.code === "auth/invalid-email"
+        ? "Email không hợp lệ"
+        : err.code === "auth/configuration-not-found"
+        ? "Firebase chưa bật Email/Password Authentication. Vào Firebase Console → Authentication → Sign-in method → Bật Email/Password"
+        : err.code === "auth/admin-restricted-operation"
+        ? "Firebase chưa bật Email/Password Authentication"
+        : `Lỗi: ${err.code || err.message}`;
+      setError(msg);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-logo">
+          <div className="login-logo-icon">P</div>
+          <h1>Phúc Yên Center</h1>
+          <p>Hệ thống Quản lý Anh Ngữ</p>
+        </div>
+
+        {error && <div className="login-error">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          {isRegister && (
+            <div className="form-group">
+              <label className="form-label">Họ và tên</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Nhập họ và tên"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+          )}
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className="form-input"
+              placeholder="admin@edu-erp.vn"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Mật khẩu</label>
+            <input
+              type="password"
+              className="form-input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn btn-primary login-btn"
+            disabled={loading}
+          >
+            {loading ? "Đang xử lý..." : isRegister ? "Tạo tài khoản Admin" : "Đăng nhập"}
+          </button>
+        </form>
+
+        <div style={{ textAlign: "center", marginTop: 20 }}>
+          <button
+            className="btn btn-ghost"
+            onClick={() => { setIsRegister(!isRegister); setError(""); }}
+            style={{ fontSize: 13 }}
+          >
+            {isRegister ? "← Quay lại Đăng nhập" : "Tạo tài khoản Admin mới →"}
+          </button>
+        </div>
+        <div className="login-footer" style={{ marginTop: 24, textAlign: "center", fontSize: 12, color: "var(--text-light)" }}>
+          <p>© 2026 Bản quyền thuộc bởi Nguyễn Thế Sỹ 1368</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AppContent() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="login-page">
+        <div className="loading-spinner">
+          <div className="spinner" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return <LoginPage />;
+  return <DashboardApp />;
+}
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
