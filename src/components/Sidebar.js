@@ -92,14 +92,14 @@ const menuItems = [
   },
 ];
 
-export default function Sidebar({ activePage, onNavigate }) {
+export default function Sidebar({ activePage, onNavigate, className = "" }) {
   const { user, userData, logout: handleLogout } = useAuth();
 
   const role = userData?.role || "teacher";
   const initials = (userData?.displayName || user?.email || "U").charAt(0).toUpperCase();
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${className}`}>
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">P</div>
         <div>

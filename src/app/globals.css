@@ -63,8 +63,17 @@ body {
   top: 0; left: 0; bottom: 0;
   display: flex;
   flex-direction: column;
-  z-index: 100;
+  z-index: 1000;
   transition: transform var(--transition);
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
 }
 
 .sidebar-logo {
@@ -186,6 +195,13 @@ body {
   flex: 1;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+  transition: margin var(--transition);
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+  }
 }
 
 .header {
@@ -196,10 +212,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
+  padding: 0 24px;
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 100;
+}
+
+@media (max-width: 640px) {
+  .header { padding: 0 16px; }
+  .header-search { display: none; }
 }
 
 .header-title {
@@ -776,8 +797,52 @@ tbody tr:last-child td { border-bottom: none; }
 
 .tab:hover:not(.active) { color: var(--text); }
 
-/* ===== TWO COLUMN GRID ===== */
-.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+/* ===== RESPONSIVE UTILS ===== */
+@media (max-width: 1024px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .page-content { padding: 20px; }
+}
+
+@media (max-width: 768px) {
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .modal { width: 95%; padding: 16px; }
+  .card-header { padding: 16px; flex-direction: column; align-items: flex-start; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-search { max-width: none; }
+}
+
+@media (max-width: 480px) {
+  .page-content { padding: 16px; }
+  .stat-card { padding: 16px; }
+  .stat-value { font-size: 24px; }
+  .header-title { font-size: 16px; }
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 8px;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .mobile-menu-btn { display: flex; }
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+
+@media (max-width: 1024px) {
+  .sidebar-overlay.visible { display: block; }
+}
 
 /* ===== TOAST ===== */
 .toast {
