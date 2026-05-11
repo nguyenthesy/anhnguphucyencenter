@@ -6,6 +6,8 @@ import { getToday, getDayOfWeek } from "@/utils/formatters";
 // Hướng dẫn: Bạn cần cài đặt thư viện 'resend' hoặc 'nodemailer' để gửi mail thực tế.
 // npm install resend
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const key = searchParams.get("key");
