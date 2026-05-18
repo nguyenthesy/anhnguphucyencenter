@@ -78,3 +78,22 @@ export function firebaseTimestampToDate(timestamp) {
   if (timestamp.seconds) return new Date(timestamp.seconds * 1000);
   return new Date(timestamp);
 }
+
+export function generateTransactionId(date, index) {
+  const d = date instanceof Date ? date : new Date(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const suffix = String(index).padStart(4, "0");
+  return `TXN-${y}${m}${day}-${suffix}`;
+}
+
+export function formatCompactCurrency(amount) {
+  if (!amount && amount !== 0) return "0đ";
+  const abs = Math.abs(amount);
+  const sign = amount < 0 ? "-" : "";
+  if (abs >= 1e9) return sign + (abs / 1e9).toFixed(1).replace(/\.0$/, "") + " tỷ";
+  if (abs >= 1e6) return sign + (abs / 1e6).toFixed(1).replace(/\.0$/, "") + " tr";
+  if (abs >= 1e3) return sign + (abs / 1e3).toFixed(0) + "K";
+  return sign + abs.toLocaleString("vi-VN") + "đ";
+}

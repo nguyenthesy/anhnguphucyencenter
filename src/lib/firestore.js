@@ -240,3 +240,66 @@ export async function updateTeacher(id, data, oldName = null) {
 export async function deleteTeacher(id) {
   return remove("teachers", id);
 }
+
+// ==================== INVESTMENTS (VỐN ĐẦU TƯ) ====================
+
+export async function getInvestments() {
+  return getAllOrdered("investments", "date", "desc");
+}
+
+export async function createInvestment(data) {
+  return create("investments", {
+    ...data,
+    date: data.date || new Date().toISOString().split("T")[0],
+  });
+}
+
+export async function updateInvestment(id, data) {
+  return update("investments", id, data);
+}
+
+export async function deleteInvestment(id) {
+  return remove("investments", id);
+}
+
+// ==================== INCOMES (KHOẢN THU) ====================
+
+export async function getIncomes() {
+  return getAllOrdered("incomes", "date", "desc");
+}
+
+export async function createIncome(data) {
+  return create("incomes", {
+    ...data,
+    date: data.date || new Date().toISOString().split("T")[0],
+  });
+}
+
+export async function updateIncome(id, data) {
+  return update("incomes", id, data);
+}
+
+export async function deleteIncome(id) {
+  return remove("incomes", id);
+}
+
+// ==================== EXPENSES (KHOẢN CHI) ====================
+
+export async function getExpenses() {
+  return getAllOrdered("expenses", "date", "desc");
+}
+
+export async function createExpense(data) {
+  return create("expenses", {
+    ...data,
+    date: data.date || new Date().toISOString().split("T")[0],
+  });
+}
+
+export async function updateExpense(id, data) {
+  return update("expenses", id, data);
+}
+
+export async function deleteExpense(id) {
+  return remove("expenses", id);
+}

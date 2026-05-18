@@ -57,10 +57,10 @@ const menuItems = [
       },
       {
         key: "finance",
-        label: "Học phí",
+        label: "Tài chính",
         icon: (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            <rect x="2" y="4" width="20" height="16" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /><line x1="6" y1="14" x2="6" y2="14.01" /><line x1="10" y1="14" x2="14" y2="14" />
           </svg>
         ),
       },

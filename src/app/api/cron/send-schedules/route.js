@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getDocs, collection, query, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getDocs, collection, query, where } from "firebase/firestore/lite";
+import { serverDb as db } from "@/lib/firebase-server";
 import { getToday, getDayOfWeek } from "@/utils/formatters";
 
 // Hướng dẫn: Bạn cần cài đặt thư viện 'resend' hoặc 'nodemailer' để gửi mail thực tế.

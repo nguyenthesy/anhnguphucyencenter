@@ -7,7 +7,7 @@ import ClassesPage from "./pages/ClassesPage";
 import SessionsPage from "./pages/SessionsPage";
 import AttendancePage from "./pages/AttendancePage";
 import UsersPage from "./pages/UsersPage";
-import FinancePage from "./pages/FinancePage";
+import FinanceManagementPage from "./pages/finance/FinanceManagementPage";
 import TeachersPage from "./pages/TeachersPage";
 
 const SearchIcon = () => (
@@ -23,7 +23,7 @@ const pageLabels = {
   sessions: "Buổi học",
   attendance: "Điểm danh",
   users: "Quản lý Tài khoản",
-  finance: "Quản lý Học phí",
+  finance: "Quản lý Tài chính",
   teachers: "Quản lý Giáo viên",
 };
 
@@ -55,7 +55,7 @@ export default function DashboardApp() {
       case "users":
         return <UsersPage />;
       case "finance":
-        return <FinancePage globalSearch={globalSearch} />;
+        return <FinanceManagementPage globalSearch={globalSearch} />;
       case "teachers":
         return <TeachersPage globalSearch={globalSearch} />;
       default:
