@@ -207,7 +207,7 @@ export function exportBankStatementPDF({
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59);
     doc.text("NGUYEN THE SY", col1X, sigY + 30, { align: "center" });
-    doc.text("TRAN THI HA", col2X, sigY + 30, { align: "center" }); // Đã chuyển thành TRAN THI HA không dấu cho chuẩn font helvetica hiện tại của bệ hạ
+    doc.text("TRAN HA THI", col2X, sigY + 30, { align: "center" });
 
     // Save
     const fileName = `SaoKe_TaiChinh_${dateFrom || "all"}_${dateTo || "all"}.pdf`;
