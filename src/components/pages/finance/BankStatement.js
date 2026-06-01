@@ -100,6 +100,25 @@ export default function BankStatement({ incomes, expenses, investments, financia
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
+  const [copiedImageUrl, setCopiedImageUrl] = useState(null);
+
+  const handleClosePreview = () => {
+    if (copiedImageUrl) {
+      URL.revokeObjectURL(copiedImageUrl);
+      setCopiedImageUrl(null);
+    }
+    setIsPreviewOpen(false);
+  };
+
+  const handleDownloadImage = () => {
+    if (!copiedImageUrl) return;
+    const a = document.createElement("a");
+    a.href = copiedImageUrl;
+    a.download = `BaoCaoTaiChinh_${dateFrom || "all"}_${dateTo || "all"}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
@@ -138,46 +157,9 @@ export default function BankStatement({ incomes, expenses, investments, financia
 
       canvas.toBlob(async (blob) => {
         if (!blob) return;
-        const fileName = `BaoCaoTaiChinh_${dateFrom || "all"}_${dateTo || "all"}.png`;
-        const file = new File([blob], fileName, { type: "image/png" });
-
-        // 1. Nếu dùng điện thoại/thiết bị hỗ trợ chia sẻ file (Web Share API)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: "Báo cáo tài chính Phúc Yên Edu",
-            });
-            setIsCopying(false);
-            return;
-          } catch (shareErr) {
-            // Nếu người dùng nhấn hủy chia sẻ hoặc lỗi, tiếp tục chạy các fallback bên dưới
-            console.log("Share API cancelled/failed:", shareErr);
-          }
-        }
-
-        // 2. Thử ghi vào bộ nhớ đệm (Clipboard)
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ "image/png": blob })
-          ]);
-          alert("📋 Đã sao chép ảnh báo cáo tài chính vào bộ nhớ đệm thành công!\nBạn có thể dán (Ctrl+V) để gửi ngay qua Zalo, Messenger, Facebook, v.v.");
-        } catch (err) {
-          console.error("Clipboard write failed:", err);
-          
-          // 3. Tự động tải về nếu cả 2 cách trên không được
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = fileName;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          alert("⚠️ Thiết bị chặn quyền tự động sao chép.\nĐã tự động tải ảnh báo cáo tài chính (.png) về máy của bạn!");
-        } finally {
-          setIsCopying(false);
-        }
+        const imageUrl = URL.createObjectURL(blob);
+        setCopiedImageUrl(imageUrl);
+        setIsCopying(false);
       }, "image/png");
     } catch (err) {
       console.error(err);
@@ -294,11 +276,7 @@ export default function BankStatement({ incomes, expenses, investments, financia
         <div className="finance-pagination">
           <button className="btn btn-sm btn-outline" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>← Trước</button>
           <span className="finance-pagination-info">Trang {currentPage} / {totalPages}</span>
-          <button className="btn btn-sm btn-outline" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>Sau →</button>
-        </div>
-      )}
-
-      {/* PDF PREVIEW & COPY IMAGE MODAL */}
+          <button className="btn btn-sm btn-outline"      {/* PDF PREVIEW & COPY IMAGE MODAL */}
       {isPreviewOpen && (
         <div style={{
           position: "fixed",
@@ -314,7 +292,7 @@ export default function BankStatement({ incomes, expenses, investments, financia
           padding: "20px",
           overflowY: "auto",
           backdropFilter: "blur(4px)"
-        }} onClick={() => setIsPreviewOpen(false)}>
+        }} onClick={handleClosePreview}>
           <div style={{
             backgroundColor: "#f1f5f9",
             borderRadius: "12px",
@@ -325,7 +303,7 @@ export default function BankStatement({ incomes, expenses, investments, financia
             flexDirection: "column",
             animation: "modalFadeIn 0.2s ease-out"
           }} onClick={(e) => e.stopPropagation()}>
-
+            
             {/* Modal Header */}
             <div style={{
               display: "flex",
@@ -338,34 +316,75 @@ export default function BankStatement({ incomes, expenses, investments, financia
               borderTopRightRadius: "12px"
             }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#0f172a" }}>👁️ Xem trước & Sao chép ảnh báo cáo</h3>
-                <span style={{ fontSize: "12px", color: "#64748b" }}>Toàn bộ giao dịch sau khi lọc sẽ hiển thị bên dưới</span>
+                <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#0f172a" }}>👁️ Xem trước & Xuất ảnh báo cáo</h3>
+                <span style={{ fontSize: "12px", color: "#64748b" }}>Nhấp nút bên phải để xuất thành file ảnh gửi Zalo/FB</span>
               </div>
               <div style={{ display: "flex", gap: "8px" }}>
-                <button
-                  onClick={handleCopyAsImage}
-                  disabled={isCopying}
-                  style={{
-                    backgroundColor: "var(--success, #10b981)",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "8px 16px",
-                    fontWeight: 600,
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    transition: "opacity 0.2s"
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.opacity = "0.9"}
-                  onMouseOut={(e) => e.currentTarget.style.opacity = "1"}
-                >
-                  {isCopying ? "⏳ Đang tạo ảnh..." : "📋 Sao chép ảnh (Zalo/Messenger)"}
-                </button>
-                <button
-                  onClick={() => setIsPreviewOpen(false)}
+                {copiedImageUrl ? (
+                  <>
+                    <button 
+                      onClick={handleDownloadImage}
+                      style={{
+                        backgroundColor: "#3b82f6",
+                        color: "#ffffff",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "8px 16px",
+                        fontWeight: 600,
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px"
+                      }}
+                    >
+                      💾 Tải ảnh (.png)
+                    </button>
+                    <button 
+                      onClick={() => {
+                        URL.revokeObjectURL(copiedImageUrl);
+                        setCopiedImageUrl(null);
+                      }}
+                      style={{
+                        backgroundColor: "#cbd5e1",
+                        color: "#1e293b",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "8px 16px",
+                        fontWeight: 600,
+                        fontSize: "13px",
+                        cursor: "pointer"
+                      }}
+                    >
+                      🔄 Tạo lại
+                    </button>
+                  </>
+                ) : (
+                  <button 
+                    onClick={handleCopyAsImage}
+                    disabled={isCopying}
+                    style={{
+                      backgroundColor: "var(--success, #10b981)",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "8px 16px",
+                      fontWeight: 600,
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      transition: "opacity 0.2s"
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.opacity = "0.9"}
+                    onMouseOut={(e) => e.currentTarget.style.opacity = "1"}
+                  >
+                    {isCopying ? "⏳ Đang tạo ảnh..." : "📋 Tạo ảnh báo cáo"}
+                  </button>
+                )}
+                <button 
+                  onClick={handleClosePreview}
                   style={{
                     backgroundColor: "#e2e8f0",
                     color: "#475569",
@@ -391,159 +410,193 @@ export default function BankStatement({ incomes, expenses, investments, financia
               maxHeight: "70vh",
               overflowY: "auto"
             }}>
-              {/* Actual A4 Page Layout for html2canvas */}
-              <div id="report-preview-container" style={{
-                width: "760px",
-                backgroundColor: "#ffffff",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                padding: "36px",
-                fontFamily: "Arial, Helvetica, sans-serif",
-                color: "#1e293b",
-                display: "flex",
-                flexDirection: "column",
-                boxSizing: "border-box"
-              }}>
-                {/* Header */}
-                <div style={{
-                  backgroundColor: "#0f172a",
-                  color: "#ffffff",
-                  padding: "20px",
-                  borderRadius: "6px",
-                  textAlign: "center",
-                  marginBottom: "24px"
-                }}>
-                  <h2 style={{ margin: "0 0 6px 0", fontSize: "20px", fontWeight: 800, letterSpacing: "0.5px" }}>ANH NGỮ QUỐC TẾ PHÚC YÊN EDU</h2>
-                  <p style={{ margin: "0 0 6px 0", fontSize: "12px", fontWeight: 600, color: "#94a3b8" }}>BÁO CÁO TÀI CHÍNH</p>
-                  <div style={{ fontSize: "10px", color: "#cbd5e1" }}>
-                    Từ ngày: {dateFrom ? formatDate(dateFrom) : "---"}  -  Đến ngày: {dateTo ? formatDate(dateTo) : "---"}
-                  </div>
-                  <div style={{ fontSize: "10px", color: "#cbd5e1", marginTop: "4px" }}>
-                    Ngày xuất: {new Date().toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })}
-                  </div>
-                </div>
-
-                {/* Financial Summary */}
-                <h4 style={{ margin: "0 0 8px 0", fontSize: "11px", fontWeight: 700, color: "#1e293b", textTransform: "uppercase" }}>TỔNG QUAN TÀI CHÍNH</h4>
-                <div style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: "10px",
-                  marginBottom: "24px"
-                }}>
+              {copiedImageUrl ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", width: "100%" }}>
                   <div style={{
-                    backgroundColor: "#f8fafc",
-                    borderLeft: "4px solid #10b981",
-                    borderRadius: "4px",
-                    padding: "8px 12px",
-                    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)"
+                    backgroundColor: "#ecfdf5",
+                    color: "#065f46",
+                    padding: "12px 16px",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    textAlign: "center",
+                    width: "100%",
+                    maxWidth: "760px",
+                    border: "1px solid #a7f3d0",
+                    boxSizing: "border-box"
                   }}>
-                    <span style={{ fontSize: "9px", color: "#64748b", fontWeight: 600 }}>Tổng thu</span>
-                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#10b981", marginTop: "2px", whiteSpace: "nowrap" }}>{formatCurrency(filteredTotalIncome)}</div>
+                    🎉 Đã xuất ảnh báo cáo thành công! 
+                    <br />
+                    <span style={{ fontWeight: 500, fontSize: "12px", color: "#047857" }}>
+                      💡 <b>Mẹo trên điện thoại:</b> Hãy <b>chạm và giữ (ấn giữ)</b> vào tấm ảnh bên dưới để chọn <b>Lưu ảnh</b> hoặc <b>Chia sẻ</b> trực tiếp qua Zalo, Messenger.
+                    </span>
                   </div>
-                  <div style={{
-                    backgroundColor: "#f8fafc",
-                    borderLeft: "4px solid #ef4444",
-                    borderRadius: "4px",
-                    padding: "8px 12px",
-                    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)"
-                  }}>
-                    <span style={{ fontSize: "9px", color: "#64748b", fontWeight: 600 }}>Tổng chi</span>
-                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#ef4444", marginTop: "2px", whiteSpace: "nowrap" }}>{formatCurrency(filteredTotalExpense)}</div>
-                  </div>
-                  <div style={{
-                    backgroundColor: "#f8fafc",
-                    borderLeft: "4px solid #4f46e5",
-                    borderRadius: "4px",
-                    padding: "8px 12px",
-                    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)"
-                  }}>
-                    <span style={{ fontSize: "9px", color: "#64748b", fontWeight: 600 }}>Số dư hiện tại</span>
-                    <div style={{ fontSize: "14px", fontWeight: 700, color: "#4f46e5", marginTop: "2px", whiteSpace: "nowrap" }}>{formatCurrency(financials.currentBalance)}</div>
-                  </div>
+                  <img 
+                    src={copiedImageUrl} 
+                    alt="Báo cáo tài chính" 
+                    style={{ 
+                      width: "760px", 
+                      maxWidth: "100%", 
+                      boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", 
+                      borderRadius: "6px" 
+                    }} 
+                  />
                 </div>
-
-                {/* Table Data */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
-                  <h4 style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: "#1e293b", textTransform: "uppercase" }}>CHI TIẾT GIAO DỊCH</h4>
-                  <span style={{ fontSize: "9px", color: "#64748b", fontWeight: 500 }}>({filtered.length} giao dịch)</span>
-                </div>
-                <table style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: "9px",
-                  marginBottom: "28px"
-                }}>
-                  <thead>
-                    <tr style={{ backgroundColor: "#0f172a", color: "#ffffff" }}>
-                      <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "center", width: "30px" }}>#</th>
-                      <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "center", width: "70px" }}>Ngày</th>
-                      <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "center", width: "40px" }}>Loại</th>
-                      <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "left" }}>Nội dung</th>
-                      <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "right", width: "105px" }}>Thu (+)</th>
-                      <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "right", width: "105px" }}>Chi (-)</th>
-                      <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "right", width: "115px" }}>Số dư</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} style={{ padding: "20px", fontStyle: "italic", textAlign: "center", color: "#64748b" }}>Không có giao dịch</td>
-                      </tr>
-                    ) : filtered.map((txn, idx) => (
-                      <tr key={txn.id} style={{ backgroundColor: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
-                        <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "center", color: "#64748b" }}>{idx + 1}</td>
-                        <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "center", fontWeight: 500, whiteSpace: "nowrap" }}>{formatDate(txn.date)}</td>
-                        <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "center" }}>
-                          <span style={{
-                            padding: "2px 4px",
-                            borderRadius: "3px",
-                            fontSize: "8px",
-                            fontWeight: 700,
-                            backgroundColor: txn.type === "income" ? "#d1fae5" : "#fee2e2",
-                            color: txn.type === "income" ? "#065f46" : "#991b1b"
-                          }}>
-                            {txn.type === "income" ? "THU" : "CHI"}
-                          </span>
-                        </td>
-                        <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", fontWeight: 600 }}>{txn.description}</td>
-                        <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "right", color: "#10b981", fontWeight: 600, whiteSpace: "nowrap" }}>
-                          {txn.type === "income" ? "+" + formatCurrency(txn.amount) : ""}
-                        </td>
-                        <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "right", color: "#ef4444", fontWeight: 600, whiteSpace: "nowrap" }}>
-                          {txn.type === "expense" ? "-" + formatCurrency(txn.amount) : ""}
-                        </td>
-                        <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "right", fontWeight: 700, whiteSpace: "nowrap" }}>
-                          {formatCurrency(txn.balance)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Signatures */}
-                <div style={{
+              ) : (
+                /* Actual A4 Page Layout for html2canvas */
+                <div id="report-preview-container" style={{
+                  width: "760px",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                  padding: "36px",
+                  fontFamily: "Arial, Helvetica, sans-serif",
+                  color: "#1e293b",
                   display: "flex",
-                  justifyContent: "space-between",
-                  marginTop: "auto",
-                  paddingTop: "20px",
-                  fontSize: "9px"
+                  flexDirection: "column",
+                  boxSizing: "border-box"
                 }}>
-                  <div style={{ textAlign: "center", width: "200px" }}>
-                    <span style={{ fontWeight: 700 }}>Người lập</span>
-                    <br />
-                    <span style={{ fontSize: "8px", color: "#94a3b8", fontStyle: "italic" }}>(Ký, ghi rõ họ tên)</span>
-                    <div style={{ height: "50px" }}></div>
-                    <span style={{ fontWeight: 700, textTransform: "uppercase" }}>NGUYỄN THẾ SỸ</span>
+                  {/* Header */}
+                  <div style={{
+                    backgroundColor: "#0f172a",
+                    color: "#ffffff",
+                    padding: "20px",
+                    borderRadius: "6px",
+                    textAlign: "center",
+                    marginBottom: "24px"
+                  }}>
+                    <h2 style={{ margin: "0 0 6px 0", fontSize: "20px", fontWeight: 800, letterSpacing: "0.5px" }}>ANH NGỮ QUỐC TẾ PHÚC YÊN EDU</h2>
+                    <p style={{ margin: "0 0 6px 0", fontSize: "12px", fontWeight: 600, color: "#94a3b8" }}>BÁO CÁO TÀI CHÍNH</p>
+                    <div style={{ fontSize: "10px", color: "#cbd5e1" }}>
+                      Từ ngày: {dateFrom ? formatDate(dateFrom) : "---"}  -  Đến ngày: {dateTo ? formatDate(dateTo) : "---"}
+                    </div>
+                    <div style={{ fontSize: "10px", color: "#cbd5e1", marginTop: "4px" }}>
+                      Ngày xuất: {new Date().toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })}
+                    </div>
                   </div>
-                  <div style={{ textAlign: "center", width: "200px" }}>
-                    <span style={{ fontWeight: 700 }}>Chủ hộ kinh doanh</span>
-                    <br />
-                    <span style={{ fontSize: "8px", color: "#94a3b8", fontStyle: "italic" }}>(Ký, ghi rõ họ tên)</span>
-                    <div style={{ height: "50px" }}></div>
-                    <span style={{ fontWeight: 700, textTransform: "uppercase" }}>TRẦN HÀ THI</span>
+
+                  {/* Financial Summary */}
+                  <h4 style={{ margin: "0 0 8px 0", fontSize: "11px", fontWeight: 700, color: "#1e293b", textTransform: "uppercase" }}>TỔNG QUAN TÀI CHÍNH</h4>
+                  <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr 1fr",
+                    gap: "10px",
+                    marginBottom: "24px"
+                  }}>
+                    <div style={{
+                      backgroundColor: "#f8fafc",
+                      borderLeft: "4px solid #10b981",
+                      borderRadius: "4px",
+                      padding: "8px 12px",
+                      boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)"
+                    }}>
+                      <span style={{ fontSize: "9px", color: "#64748b", fontWeight: 600 }}>Tổng thu</span>
+                      <div style={{ fontSize: "14px", fontWeight: 700, color: "#10b981", marginTop: "2px", whiteSpace: "nowrap" }}>{formatCurrency(filteredTotalIncome)}</div>
+                    </div>
+                    <div style={{
+                      backgroundColor: "#f8fafc",
+                      borderLeft: "4px solid #ef4444",
+                      borderRadius: "4px",
+                      padding: "8px 12px",
+                      boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)"
+                    }}>
+                      <span style={{ fontSize: "9px", color: "#64748b", fontWeight: 600 }}>Tổng chi</span>
+                      <div style={{ fontSize: "14px", fontWeight: 700, color: "#ef4444", marginTop: "2px", whiteSpace: "nowrap" }}>{formatCurrency(filteredTotalExpense)}</div>
+                    </div>
+                    <div style={{
+                      backgroundColor: "#f8fafc",
+                      borderLeft: "4px solid #4f46e5",
+                      borderRadius: "4px",
+                      padding: "8px 12px",
+                      boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)"
+                    }}>
+                      <span style={{ fontSize: "9px", color: "#64748b", fontWeight: 600 }}>Số dư hiện tại</span>
+                      <div style={{ fontSize: "14px", fontWeight: 700, color: "#4f46e5", marginTop: "2px", whiteSpace: "nowrap" }}>{formatCurrency(financials.currentBalance)}</div>
+                    </div>
+                  </div>
+
+                  {/* Table Data */}
+                  <div style={{ display: "flex", justifyStyle: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+                    <h4 style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: "#1e293b", textTransform: "uppercase" }}>CHI TIẾT GIAO DỊCH</h4>
+                    <span style={{ fontSize: "9px", color: "#64748b", fontWeight: 500 }}>({filtered.length} giao dịch)</span>
+                  </div>
+                  <table style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "9px",
+                    marginBottom: "28px"
+                  }}>
+                    <thead>
+                      <tr style={{ backgroundColor: "#0f172a", color: "#ffffff" }}>
+                        <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "center", width: "30px" }}>#</th>
+                        <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "center", width: "70px" }}>Ngày</th>
+                        <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "center", width: "40px" }}>Loại</th>
+                        <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "left" }}>Nội dung</th>
+                        <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "right", width: "105px" }}>Thu (+)</th>
+                        <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "right", width: "105px" }}>Chi (-)</th>
+                        <th style={{ padding: "6px 8px", border: "1px solid #cbd5e1", textAlign: "right", width: "115px" }}>Số dư</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} style={{ padding: "20px", fontStyle: "italic", textAlign: "center", color: "#64748b" }}>Không có giao dịch</td>
+                        </tr>
+                      ) : filtered.map((txn, idx) => (
+                        <tr key={txn.id} style={{ backgroundColor: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
+                          <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "center", color: "#64748b" }}>{idx + 1}</td>
+                          <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "center", fontWeight: 500, whiteSpace: "nowrap" }}>{formatDate(txn.date)}</td>
+                          <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "center" }}>
+                            <span style={{
+                              padding: "2px 4px",
+                              borderRadius: "3px",
+                              fontSize: "8px",
+                              fontWeight: 700,
+                              backgroundColor: txn.type === "income" ? "#d1fae5" : "#fee2e2",
+                              color: txn.type === "income" ? "#065f46" : "#991b1b"
+                            }}>
+                              {txn.type === "income" ? "THU" : "CHI"}
+                            </span>
+                          </td>
+                          <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", fontWeight: 600 }}>{txn.description}</td>
+                          <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "right", color: "#10b981", fontWeight: 600, whiteSpace: "nowrap" }}>
+                            {txn.type === "income" ? "+" + formatCurrency(txn.amount) : ""}
+                          </td>
+                          <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "right", color: "#ef4444", fontWeight: 600, whiteSpace: "nowrap" }}>
+                            {txn.type === "expense" ? "-" + formatCurrency(txn.amount) : ""}
+                          </td>
+                          <td style={{ padding: "5px 8px", border: "1px solid #e2e8f0", textAlign: "right", fontWeight: 700, whiteSpace: "nowrap" }}>
+                            {formatCurrency(txn.balance)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* Signatures */}
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "auto",
+                    paddingTop: "20px",
+                    fontSize: "9px"
+                  }}>
+                    <div style={{ textAlign: "center", width: "200px" }}>
+                      <span style={{ fontWeight: 700 }}>Người lập</span>
+                      <br />
+                      <span style={{ fontSize: "8px", color: "#94a3b8", fontStyle: "italic" }}>(Ký, ghi rõ họ tên)</span>
+                      <div style={{ height: "50px" }}></div>
+                      <span style={{ fontWeight: 700, textTransform: "uppercase" }}>NGUYỄN THẾ SỸ</span>
+                    </div>
+                    <div style={{ textAlign: "center", width: "200px" }}>
+                      <span style={{ fontWeight: 700 }}>Chủ hộ kinh doanh</span>
+                      <br />
+                      <span style={{ fontSize: "8px", color: "#94a3b8", fontStyle: "italic" }}>(Ký, ghi rõ họ tên)</span>
+                      <div style={{ height: "50px" }}></div>
+                      <span style={{ fontWeight: 700, textTransform: "uppercase" }}>TRẦN HÀ THI</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
