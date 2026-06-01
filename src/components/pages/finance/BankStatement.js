@@ -276,7 +276,11 @@ export default function BankStatement({ incomes, expenses, investments, financia
         <div className="finance-pagination">
           <button className="btn btn-sm btn-outline" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>← Trước</button>
           <span className="finance-pagination-info">Trang {currentPage} / {totalPages}</span>
-          <button className="btn btn-sm btn-outline"      {/* PDF PREVIEW & COPY IMAGE MODAL */}
+          <button className="btn btn-sm btn-outline" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>Sau →</button>
+        </div>
+      )}
+
+      {/* PDF PREVIEW & COPY IMAGE MODAL */}
       {isPreviewOpen && (
         <div style={{
           position: "fixed",
