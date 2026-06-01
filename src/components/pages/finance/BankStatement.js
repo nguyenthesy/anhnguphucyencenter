@@ -138,23 +138,43 @@ export default function BankStatement({ incomes, expenses, investments, financia
 
       canvas.toBlob(async (blob) => {
         if (!blob) return;
+        const fileName = `BaoCaoTaiChinh_${dateFrom || "all"}_${dateTo || "all"}.png`;
+        const file = new File([blob], fileName, { type: "image/png" });
+
+        // 1. Nếu dùng điện thoại/thiết bị hỗ trợ chia sẻ file (Web Share API)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: "Báo cáo tài chính Phúc Yên Edu",
+            });
+            setIsCopying(false);
+            return;
+          } catch (shareErr) {
+            // Nếu người dùng nhấn hủy chia sẻ hoặc lỗi, tiếp tục chạy các fallback bên dưới
+            console.log("Share API cancelled/failed:", shareErr);
+          }
+        }
+
+        // 2. Thử ghi vào bộ nhớ đệm (Clipboard)
         try {
           await navigator.clipboard.write([
             new ClipboardItem({ "image/png": blob })
           ]);
-          // alert("📋 Đã sao chép ảnh báo cáo tài chính vào bộ nhớ đệm thành công!\nBạn có thể dán (Ctrl+V) để gửi ngay qua Zalo, Messenger, Facebook, v.v.");
+          alert("📋 Đã sao chép ảnh báo cáo tài chính vào bộ nhớ đệm thành công!\nBạn có thể dán (Ctrl+V) để gửi ngay qua Zalo, Messenger, Facebook, v.v.");
         } catch (err) {
           console.error("Clipboard write failed:", err);
-          // Fallback: auto-download the image
+          
+          // 3. Tự động tải về nếu cả 2 cách trên không được
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `BaoCaoTaiChinh_${dateFrom || "all"}_${dateTo || "all"}.png`;
+          a.download = fileName;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-          alert("⚠️ Trình duyệt chặn quyền ghi Clipboard.\nĐã tự động tải ảnh báo cáo tài chính (.png) về máy của bạn!");
+          alert("⚠️ Thiết bị chặn quyền tự động sao chép.\nĐã tự động tải ảnh báo cáo tài chính (.png) về máy của bạn!");
         } finally {
           setIsCopying(false);
         }
