@@ -1,5 +1,10 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import {
+    robotoRegularBase64,
+    robotoBoldBase64,
+    robotoItalicBase64,
+} from "./robotoFonts";
 
 /**
  * Export bank statement as a professional PDF
@@ -13,6 +18,16 @@ export function exportBankStatementPDF({
     currentBalance,
 }) {
     const doc = new jsPDF("p", "mm", "a4");
+
+    // Register Roboto fonts for Vietnamese Unicode support
+    doc.addFileToVFS("Roboto-Regular.ttf", robotoRegularBase64);
+    doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+    doc.addFileToVFS("Roboto-Bold.ttf", robotoBoldBase64);
+    doc.addFont("Roboto-Bold.ttf", "Roboto", "bold");
+    doc.addFileToVFS("Roboto-Italic.ttf", robotoItalicBase64);
+    doc.addFont("Roboto-Italic.ttf", "Roboto", "italic");
+    doc.setFont("Roboto", "normal");
+
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 14;
     let y = margin;
@@ -23,14 +38,14 @@ export function exportBankStatementPDF({
 
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
-    doc.setFont("helvetica", "bold");
-    doc.text("ANH NGU QUOC TE PHUC YEN EDU", pageWidth / 2, 16, {
+    doc.setFont("Roboto", "bold");
+    doc.text("ANH NGỮ QUỐC TẾ PHÚC YÊN EDU", pageWidth / 2, 16, {
         align: "center",
     });
 
     doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.text("BAO CAO TAI CHINH", pageWidth / 2, 24, {
+    doc.setFont("Roboto", "normal");
+    doc.text("BÁO CÁO TÀI CHÍNH", pageWidth / 2, 24, {
         align: "center",
     });
 
@@ -38,14 +53,14 @@ export function exportBankStatementPDF({
     const fromLabel = dateFrom ? formatDateVN(dateFrom) : "---";
     const toLabel = dateTo ? formatDateVN(dateTo) : "---";
     doc.text(
-        `Tu ngay: ${fromLabel}  -  Den ngay: ${toLabel}`,
+        `Từ ngày: ${fromLabel}  -  Đến ngày: ${toLabel}`,
         pageWidth / 2,
         32,
         { align: "center" },
     );
 
     const exportDate = new Date();
-    doc.text(`Ngay xuat: ${formatDateTimeVN(exportDate)}`, pageWidth / 2, 38, {
+    doc.text(`Ngày xuất: ${formatDateTimeVN(exportDate)}`, pageWidth / 2, 38, {
         align: "center",
     });
 
@@ -54,24 +69,24 @@ export function exportBankStatementPDF({
     // ===== FINANCIAL SUMMARY =====
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("TONG QUAN TAI CHINH", margin, y);
+    doc.setFont("Roboto", "bold");
+    doc.text("TỔNG QUAN TÀI CHÍNH", margin, y);
     y += 8;
 
     const boxWidth = (pageWidth - margin * 2 - 10) / 3;
     const boxes = [
         {
-            label: "Tong thu",
+            label: "Tổng thu",
             value: formatNum(totalIncome),
             color: [16, 185, 129],
         },
         {
-            label: "Tong chi",
+            label: "Tổng chi",
             value: formatNum(totalExpense),
             color: [239, 68, 68],
         },
         {
-            label: "So du hien tai",
+            label: "Số dư hiện tại",
             value: formatNum(currentBalance),
             color: [79, 70, 229],
         },
@@ -86,12 +101,12 @@ export function exportBankStatementPDF({
         doc.line(x, y, x, y + 20);
 
         doc.setFontSize(8);
-        doc.setFont("helvetica", "normal");
+        doc.setFont("Roboto", "normal");
         doc.setTextColor(100, 116, 139);
         doc.text(box.label, x + 4, y + 7);
 
         doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
+        doc.setFont("Roboto", "bold");
         doc.setTextColor(...box.color);
         doc.text(box.value, x + 4, y + 16);
     });
@@ -101,19 +116,19 @@ export function exportBankStatementPDF({
     // ===== TRANSACTION TABLE =====
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("CHI TIET GIAO DICH", margin, y);
+    doc.setFont("Roboto", "bold");
+    doc.text("CHI TIẾT GIAO DỊCH", margin, y);
     doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
+    doc.setFont("Roboto", "normal");
     doc.setTextColor(100, 116, 139);
-    doc.text(`(${transactions.length} giao dich)`, margin + 52, y);
+    doc.text(`(${transactions.length} giao dịch)`, margin + 52, y);
     y += 6;
 
     const tableData = transactions.map((txn, idx) => [
         idx + 1,
         formatDateVN(txn.date),
         txn.type === "income" ? "THU" : "CHI",
-        truncate(removeAccents(txn.description), 30),
+        truncate(txn.description, 30),
         txn.type === "income" ? "+" + formatNum(txn.amount) : "",
         txn.type === "expense" ? "-" + formatNum(txn.amount) : "",
         formatNum(txn.balance),
@@ -122,14 +137,14 @@ export function exportBankStatementPDF({
     autoTable(doc, {
         startY: y,
         head: [
-            ["#", "Ngay", "Loai", "Noi dung", "Thu (+)", "Chi (-)", "So du"],
+            ["#", "Ngày", "Loại", "Nội dung", "Thu (+)", "Chi (-)", "Số dư"],
         ],
         body: tableData,
         theme: "grid",
         styles: {
             fontSize: 8,
             cellPadding: 3,
-            font: "helvetica",
+            font: "Roboto",
             textColor: [30, 41, 59],
             lineColor: [226, 232, 240],
             lineWidth: 0.2,
@@ -166,7 +181,7 @@ export function exportBankStatementPDF({
                 { align: "center" },
             );
             doc.text(
-                "Trung tam Anh ngu Phuc Yen - Bao cao Tai chinh",
+                "Trung tâm Anh ngữ Phúc Yên - Báo cáo Tài chính",
                 margin,
                 doc.internal.pageSize.getHeight() - 8,
             );
@@ -186,28 +201,28 @@ export function exportBankStatementPDF({
 
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("Roboto", "bold");
 
     const col1X = margin + 20;
     const col2X = pageWidth - margin - 50;
 
     // 1. Tiêu đề chức vụ
-    doc.text("Nguoi lap", col1X, sigY, { align: "center" });
-    doc.text("Giam doc", col2X, sigY, { align: "center" });
+    doc.text("Người lập", col1X, sigY, { align: "center" });
+    doc.text("Chủ hộ kinh doanh", col2X, sigY, { align: "center" });
 
     // 2. Hướng dẫn ký (In nghiêng, nhỏ hơn)
-    doc.setFont("helvetica", "italic");
+    doc.setFont("Roboto", "italic");
     doc.setFontSize(8);
     doc.setTextColor(148, 163, 184);
-    doc.text("(Ky, ghi ro ho ten)", col1X, sigY + 6, { align: "center" });
-    doc.text("(Ky, ghi ro ho ten)", col2X, sigY + 6, { align: "center" });
+    doc.text("(Ký, ghi rõ họ tên)", col1X, sigY + 6, { align: "center" });
+    doc.text("(Ký, ghi rõ họ tên)", col2X, sigY + 6, { align: "center" });
 
     // 3. Tên đầy đủ (Cách xuống một khoảng ~25mm để ký và IN ĐẬM)
-    doc.setFont("helvetica", "bold");
+    doc.setFont("Roboto", "bold");
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59);
-    doc.text("NGUYEN THE SY", col1X, sigY + 30, { align: "center" });
-    doc.text("TRAN HA THI", col2X, sigY + 30, { align: "center" });
+    doc.text("NGUYỄN THẾ SỸ", col1X, sigY + 30, { align: "center" });
+    doc.text("TRẦN HÀ THI", col2X, sigY + 30, { align: "center" });
 
     // Save
     const fileName = `SaoKe_TaiChinh_${dateFrom || "all"}_${dateTo || "all"}.pdf`;
@@ -228,19 +243,10 @@ function formatDateTimeVN(date) {
 
 function formatNum(num) {
     if (!num && num !== 0) return "0";
-    return new Intl.NumberFormat("vi-VN").format(num) + " d";
+    return new Intl.NumberFormat("vi-VN").format(num) + "\u00A0đ";
 }
 
 function truncate(str, max) {
     if (!str) return "";
     return str.length > max ? str.slice(0, max) + "..." : str;
-}
-
-function removeAccents(str) {
-    if (!str) return "";
-    return str
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/g, "d")
-        .replace(/Đ/g, "D");
 }

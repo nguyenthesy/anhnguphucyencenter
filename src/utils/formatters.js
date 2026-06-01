@@ -22,10 +22,8 @@ export function formatDateTime(date) {
 
 export function formatCurrency(amount) {
   if (!amount && amount !== 0) return "";
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(amount);
+  const formatted = Math.round(amount).toLocaleString("vi-VN");
+  return `${formatted} đ`;
 }
 
 export function getToday() {
